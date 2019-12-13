@@ -5,20 +5,24 @@ import csv
 #Build the URLS and add to list
 template = 'https://futbin.com/20/player/'
 
-urls = [template + str(i) +'/' for i in range(1,5)]
+urls = [template + str(i) +'/' for i in range(1,10)]
 
 #Assemble Dictionaries
 
 attrs = []
 
+
+
 for url in urls:
     data = requests.get(url)
     soup = BeautifulSoup(data.text, 'html.parser')
+    position = soup.find("div", class_= "pcdisplay-pos").get_text()
 
-    if data.status_code == 200:
+    if data.status_code == 200 and not position == 'GK':
         player_profile_dict = {}
         player_profile_dict['Name'] = soup.find("span", class_= "header_name").get_text()
         player_profile_dict['Overall'] = str(soup.find("h1", class_= "header_top").get_text().strip())[:2]
+        player_profile_dict['Position'] = soup.find("div", class_= "pcdisplay-pos").get_text()
         player_profile_dict['Acceleration'] = int(soup.find("div", class_="acceleration-val-0").get_text())
         player_profile_dict['Sprint Speed'] = int(soup.find("div", class_="sprintspeed-val-0").get_text())
         player_profile_dict['Positioning'] = int(soup.find("div", class_="positioning-val-0").get_text())
@@ -52,7 +56,7 @@ for url in urls:
     else:
         attrs.append(dict())
 
-fields = ['Name', 'Overall', 'Acceleration', 'Sprint Speed', 'Positioning', 'Finishing', 'Shot Power', 'Long Shots', 'Volleys', 'Penalties', 'Vision', 'Crossing', 'FK. Accuracy', 
+fields = ['Name', 'Overall', 'Position', 'Acceleration', 'Sprint Speed', 'Positioning', 'Finishing', 'Shot Power', 'Long Shots', 'Volleys', 'Penalties', 'Vision', 'Crossing', 'FK. Accuracy', 
 'Short Passing', 'Long Passing', 'Curve', 'Agility', 'Balance', 'Reactions', 'Ball Control', 'Dribbling', 'Composure', 'Interceptions', 
  'Heading Accuracy', 'Def. Awareness', 'Standing Tackle', 'Sliding Tackle', 'Jumping', 'Stamina', 'Strength', 'Aggression']
 
