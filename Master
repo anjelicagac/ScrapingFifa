@@ -1,0 +1,68 @@
+import requests
+from bs4 import BeautifulSoup
+import csv
+
+#Build the URLS and add to list
+template = 'https://futbin.com/20/player/'
+
+urls = [template + str(i) +'/' for i in range(1,5)]
+
+#Assemble Dictionaries
+
+attrs = []
+
+for url in urls:
+    data = requests.get(url)
+    soup = BeautifulSoup(data.text, 'html.parser')
+
+    if data.status_code == 200:
+        player_profile_dict = {}
+        player_profile_dict['Name'] = soup.find("span", class_= "header_name").get_text()
+        player_profile_dict['Overall'] = str(soup.find("h1", class_= "header_top").get_text().strip())[:2]
+        player_profile_dict['Acceleration'] = int(soup.find("div", class_="acceleration-val-0").get_text())
+        player_profile_dict['Sprint Speed'] = int(soup.find("div", class_="sprintspeed-val-0").get_text())
+        player_profile_dict['Positioning'] = int(soup.find("div", class_="positioning-val-0").get_text())
+        player_profile_dict['Finishing'] = int(soup.find("div", class_="finishing-val-0").get_text())
+        player_profile_dict['Shot Power'] = int(soup.find("div", class_="shotpower-val-0").get_text())
+        player_profile_dict['Long Shots'] = int(soup.find("div", class_="longshotsaccuracy-val-0").get_text())
+        player_profile_dict['Volleys'] = int(soup.find("div", class_="volleys-val-0").get_text())
+        player_profile_dict['Penalties'] = int(soup.find("div", class_="penalties-val-0").get_text())
+        player_profile_dict['Vision'] = int(soup.find("div", class_="vision-val-0").get_text())
+        player_profile_dict['Crossing'] = int(soup.find("div", class_="crossing-val-0").get_text())
+        player_profile_dict['FK. Accuracy'] = int(soup.find("div", class_="freekickaccuracy-val-0").get_text())
+        player_profile_dict['Short Passing'] = int(soup.find("div", class_="shortpassing-val-0").get_text())
+        player_profile_dict['Long Passing'] = int(soup.find("div", class_="longpassing-val-0").get_text())
+        player_profile_dict['Curve'] = int(soup.find("div", class_="curve-val-0").get_text())
+        player_profile_dict['Agility'] = int(soup.find("div", class_="agility-val-0").get_text())
+        player_profile_dict['Balance'] = int(soup.find("div", class_="balance-val-0").get_text())
+        player_profile_dict['Reactions'] = int(soup.find("div", class_="reactions-val-0").get_text())
+        player_profile_dict['Ball Control'] = int(soup.find("div", class_="ballcontrol-val-0").get_text())
+        player_profile_dict['Dribbling'] = int(soup.find("div", class_="dribbling-val-0").get_text())
+        player_profile_dict['Composure'] = int(soup.find("div", class_="composure-val-0").get_text())
+        player_profile_dict['Interceptions'] = int(soup.find("div", class_="interceptions-val-0").get_text())
+        player_profile_dict['Heading Accuracy'] = int(soup.find("div", class_="headingaccuracy-val-0").get_text())
+        player_profile_dict['Def. Awareness'] = int(soup.find("div", class_="marking-val-0").get_text())
+        player_profile_dict['Standing Tackle'] = int(soup.find("div", class_="standingtackle-val-0").get_text())
+        player_profile_dict['Sliding Tackle'] = int(soup.find("div", class_="slidingtackle-val-0").get_text())
+        player_profile_dict['Jumping'] = int(soup.find("div", class_="jumping-val-0").get_text())
+        player_profile_dict['Stamina'] = int(soup.find("div", class_="stamina-val-0").get_text())
+        player_profile_dict['Strength'] = int(soup.find("div", class_="strength-val-0").get_text())
+        player_profile_dict['Aggression'] = int(soup.find("div", class_="aggression-val-0").get_text())
+        attrs.append(player_profile_dict)
+    else:
+        attrs.append(dict())
+
+fields = ['Name', 'Overall', 'Acceleration', 'Sprint Speed', 'Positioning', 'Finishing', 'Shot Power', 'Long Shots', 'Volleys', 'Penalties', 'Vision', 'Crossing', 'FK. Accuracy', 
+'Short Passing', 'Long Passing', 'Curve', 'Agility', 'Balance', 'Reactions', 'Ball Control', 'Dribbling', 'Composure', 'Interceptions', 
+ 'Heading Accuracy', 'Def. Awareness', 'Standing Tackle', 'Sliding Tackle', 'Jumping', 'Stamina', 'Strength', 'Aggression']
+
+filename = 'output.csv'
+
+with open(filename, 'w', newline='', encoding='utf-8-sig') as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames = fields) 
+      
+    # writing headers (field names) 
+    writer.writeheader() 
+      
+    # writing data rows 
+    writer.writerows(attrs)
