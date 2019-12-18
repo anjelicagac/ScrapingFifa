@@ -3,22 +3,32 @@ from bs4 import BeautifulSoup
 import csv
 
 #Build the URLS and add to list
-template = 'https://futbin.com/20/player/'
+template = 'https://futbin.com/19/player/'
 
-urls = [template + str(i) +'/' for i in range(1,10)]
-
-#Assemble Dictionaries
+urls = [template + str(i) +'/' for i in range(1,9)]
 
 attrs = []
 
-
-
 for url in urls:
     data = requests.get(url)
+    status = data.status_code
     soup = BeautifulSoup(data.text, 'html.parser')
-    position = soup.find("div", class_= "pcdisplay-pos").get_text()
 
-    if data.status_code == 200 and not position == 'GK':
+    position = soup.find("div", class_= "pcdisplay-pos")
+    has_position = False
+
+    if position is None:
+        while position is None:
+            data = requests.get(url)
+            soup = BeautifulSoup(data.text, 'html.parser')
+            position = soup.find("div", class_= "pcdisplay-pos")
+            has_position = True
+        #print(position.get_text())
+    elif position is not None:
+        has_position = True
+        #print(position.get_text())
+
+    if has_position == True and not position.get_text == 'GK':
         player_profile_dict = {}
         player_profile_dict['Name'] = soup.find("span", class_= "header_name").get_text()
         player_profile_dict['Overall'] = str(soup.find("h1", class_= "header_top").get_text().strip())[:2]
@@ -53,7 +63,7 @@ for url in urls:
         player_profile_dict['Strength'] = int(soup.find("div", class_="strength-val-0").get_text())
         player_profile_dict['Aggression'] = int(soup.find("div", class_="aggression-val-0").get_text())
         attrs.append(player_profile_dict)
-    elif data.status_code == 200 and position == 'GK':
+    elif has_position == True and position.get_text == 'GK':
         player_profile_dict = {}
         player_profile_dict['Name'] = soup.find("span", class_= "header_name").get_text()
         player_profile_dict['Overall'] = str(soup.find("h1", class_= "header_top").get_text().strip())[:2]
@@ -109,4 +119,4 @@ with open(filename, 'w', newline='', encoding='utf-8-sig') as csvfile:
     writer.writeheader() 
       
     # writing data rows 
-    writer.writerows(attrs)
+    writer.writerows(attrs)      
